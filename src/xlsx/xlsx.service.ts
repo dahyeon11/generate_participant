@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateXlsxDto } from './dto/create-xlsx.dto';
 import { UpdateXlsxDto } from './dto/update-xlsx.dto';
+import { multerOptions } from 'src/util/multer.options';
+import * as XLSX from 'xlsx'
 
 @Injectable()
 export class XlsxService {
-  create(createXlsxDto: CreateXlsxDto) {
-    return 'This action adds a new xlsx';
-  }
 
-  findAll() {
-    return `This action returns all xlsx`;
-  }
+  async uploadExcelSheet(file: any): Promise<string[]> {
+    const generatedFiles: string[] = [];
 
-  findOne(id: number) {
-    return `This action returns a #${id} xlsx`;
-  }
+    console.log(file.buffer, '123')
+    generatedFiles.push(file.name);
 
-  update(id: number, updateXlsxDto: UpdateXlsxDto) {
-    return `This action updates a #${id} xlsx`;
-  }
+    const workbook = await XLSX.read(file.buffer)
 
-  remove(id: number) {
-    return `This action removes a #${id} xlsx`;
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = await XLSX.utils.sheet_to_json(sheet, {
+    defval: null,
+    range: 'B8:K65535',
+    header: ['id', 'rand', 'name', 'gender', 'phone', 'dob', 'mobileID', 'watchSN', 'show', 'isControl']
+    });
+
+    console.log(rows)
+
+    return file.originalname;
   }
 }
